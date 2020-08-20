@@ -1,0 +1,13 @@
+{
+  "name": "dietervyncke/dry-redirects",
+  "description": "Dry Redirects",
+  "type": "library",
+  "require": {
+    "reinvanoyen/oak": "^1.0.6"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tnt\\Redirects\\": "src/"
+    }
+  }
+}
