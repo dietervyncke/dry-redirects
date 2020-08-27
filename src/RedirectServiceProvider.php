@@ -58,24 +58,28 @@ class RedirectServiceProvider extends ServiceProvider
 
         $this->bootEventListeners($dispatcher);
 
-        foreach (Redirect::getActiveRedirects() as $redirect) {
+        try {
 
-            $resolvedParameterRedirect = str_replace('{', '(?<', $redirect->source_path);
-            $resolvedParameterRedirect = str_replace('}', '>.+)', $resolvedParameterRedirect);
+            foreach (Redirect::getActiveRedirects() as $redirect) {
 
-            \dry\route\Router::register(null, null, [
+                $resolvedParameterRedirect = str_replace('{', '(?<', $redirect->source_path);
+                $resolvedParameterRedirect = str_replace('}', '>.+)', $resolvedParameterRedirect);
 
-                $resolvedParameterRedirect => function(Request $request) use ($redirect, $dispatcher) {
+                \dry\route\Router::register(null, null, [
 
-                    foreach ($request->parameters->get_data() as $key => $value) {
-                        $redirect->target_path = str_replace("{{$key}}", $value, $redirect->target_path);
-                    }
+                    $resolvedParameterRedirect => function(Request $request) use ($redirect, $dispatcher) {
 
-                    $dispatcher->dispatch(RouteWasHit::class, new RouteWasHit($redirect));
-                    Response::redirect($redirect->target_path, $redirect->status_code);
-                },
-            ]);
-        }
+                        foreach ($request->parameters->get_data() as $key => $value) {
+                            $redirect->target_path = str_replace("{{$key}}", $value, $redirect->target_path);
+                        }
+
+                        $dispatcher->dispatch(RouteWasHit::class, new RouteWasHit($redirect));
+                        Response::redirect($redirect->target_path, $redirect->status_code);
+                    },
+                ]);
+            }
+
+        } catch (\Exception $e) {}
     }
 
     /**
